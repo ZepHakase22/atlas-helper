@@ -13,9 +13,9 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
     <apache.atlas.version>2.0.0-SNAPSHOT</apache.atlas.version>
+    <guava.version>27.1-jre</guava.version>
+    <jersey.client.version>1.19.4</jersey.client.version>
   </properties>
 
   <dependencies>
@@ -29,14 +29,53 @@
   
   <dependencyManagement>
   	<dependencies>
+  		<!-- https://mvnrepository.com/artifact/com.sun.jersey/jersey-client -->
+		<dependency>
+		    <groupId>com.sun.jersey</groupId>
+		    <artifactId>jersey-client</artifactId>
+		    <version>${jersey.client.version}</version>
+		</dependency>
+  	
+  		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+		<dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>${guava.version}</version>
+		</dependency>
   		
   		<!-- Apache Atlas Module -->
   		<dependency>
   			<groupId>org.apache.atlas</groupId>
   			<artifactId>apache-atlas</artifactId>
   			<version>${apache.atlas.version}</version>
+		    <exclusions>
+		    	<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<groupId>com.sun.jersey</groupId>
+		    		<artifactId>jersey-client</artifactId>
+		    	</exclusion>
+		    </exclusions>
   		</dependency>
   		
+		<dependency>
+    		<groupId>org.apache.atlas</groupId>
+    		<artifactId>atlas-client-v2</artifactId>
+  			<version>${apache.atlas.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+		    	</exclusion>
+		    	<exclusion>
+		    		<groupId>com.sun.jersey</groupId>
+		    		<artifactId>jersey-client</artifactId>
+		    	</exclusion>
+		    </exclusions>
+	    </dependency>
+  	 	
   		<!-- ItAttitude Module  -->
   		<dependency>
   			<groupId>com.itattitude.atlas</groupId>
@@ -93,8 +132,8 @@
     </pluginManagement>
   </build>
   <modules>
+    <module>apache-atlas-2.0.0-SNAPSHOT</module>
     <module>helper</module>
     <module>example</module>
-    <module>apache-atlas-2.0.0-SNAPSHOT</module>
   </modules>
 </project>
