@@ -16,6 +16,8 @@
     <apache.atlas.version>2.0.0-SNAPSHOT</apache.atlas.version>
     <guava.version>27.1-jre</guava.version>
     <jersey.client.version>1.19.4</jersey.client.version>
+     <maven.compiler.target>1.8</maven.compiler.target>
+     <maven.compiler.source>1.8</maven.compiler.source>
   </properties>
 
   <dependencies>

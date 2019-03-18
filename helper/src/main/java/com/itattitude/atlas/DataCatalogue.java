@@ -1,12 +1,19 @@
 package com.itattitude.atlas;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import org.apache.atlas.ApplicationProperties;
 import org.apache.atlas.AtlasClientV2;
 import org.apache.atlas.AtlasException;
+import org.apache.atlas.AtlasServiceException;
+import org.apache.atlas.model.typedef.AtlasTypesDef;
+import org.apache.atlas.type.AtlasTypeUtil;
 import org.apache.atlas.utils.AuthenticationUtil;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.ArrayUtils;
-import com.itattitude.atlas.DataCatalogueException;
+
 import com.itattitude.atlas.DataCatalogueException.ErrorCodeEnum;
 
 
@@ -20,9 +27,21 @@ public class DataCatalogue
 
 	private AtlasClientV2 _atlasClientV2;
 	private String[] _urls;
+	private List<EnumDef> _enumsDef;
+	private List<StructDef> _structsDef;
+	private List<ClassificationDef> _classificationsDef;
+	private List<ClassDef> _classesDef;
 	
-	public DataCatalogue(String[] args, String[] credentials) throws DataCatalogueException {
+    DataCatalogue() {
+    	_enumsDef = Collections.<EnumDef>emptyList();
+    	_structsDef = Collections.<StructDef>emptyList();
+    	_classificationsDef = Collections.<ClassificationDef>emptyList();
+    	_classesDef = Collections.<ClassDef>emptyList();
+    }
 
+	public DataCatalogue(String[] args, String[] credentials) throws DataCatalogueException {
+		this();
+		
 		if(_urls.length==0)
 			_urls = this.getServerUrls(args);
 		
@@ -46,6 +65,18 @@ public class DataCatalogue
 
 		this(args, null);
 	}
+	
+    public void createEnums( EnumDef ... args) {
+
+    	for(EnumDef a: args) {
+    		_enumsDef.add(a);
+    	}
+    }
+	
+	public EnumDef createEnum(String name, String description, String typeVersion, List<EnumElementDef> enumElementDef) {
+    	return new EnumDef(name,description,typeVersion,enumElementDef);
+    }
+
 	public String[] getServerUrls(String[] args) throws DataCatalogueException {
 		
 		Configuration configuration;
@@ -56,7 +87,6 @@ public class DataCatalogue
 		try {
 			configuration = ApplicationProperties.get();
 		} catch (AtlasException e) {
-			// TODO Auto-generated catch block
 			throw new DataCatalogueException(e);
 		}
 		String[] urls = configuration.getStringArray(ATLAS_REST_ADDRESS);
@@ -64,4 +94,41 @@ public class DataCatalogue
 			throw new DataCatalogueException("Missing Atlas Rest address.", ErrorCodeEnum.MISSING_ATLAS_REST_ADDRESS);
 		return urls;	
 	}
+    public void saveTypesDef() throws DataCatalogueException  {
+    	AtlasTypesDef atlasTypesDef = AtlasTypeUtil.getTypesDef(EnumDef.asAtlasEnumDef(_enumsDef), 
+    															StructDef.asAtlasStructDef(_structsDef),
+    															ClassificationDef.asAtlasClassificationDef(_classificationsDef), 
+    															ClassDef.asAtlasEntityDef(_classesDef));
+    	try {
+			_atlasClientV2.createAtlasTypeDefs(atlasTypesDef);
+		} catch (AtlasServiceException e) {
+			throw manageAtlasServiceException(e);
+		}
+    }
+
+	public List<String> getAllTypeDefs(SearchFilter searchFilter) throws DataCatalogueException {
+		List<String> names = new ArrayList<>();
+        try {
+			AtlasTypesDef searchDefs = _atlasClientV2.getAllTypeDefs(searchFilter);
+			searchDefs.getEnumDefs().forEach(s-> names.add(s.getName()));
+			searchDefs.getStructDefs().forEach(s-> names.add(s.getName()));
+			searchDefs.getClassificationDefs().forEach(s-> names.add(s.getName()));
+			searchDefs.getEntityDefs().forEach(s-> names.add(s.getName()));
+			searchDefs.getRelationshipDefs().forEach(s-> names.add(s.getName()));
+			
+		} catch (AtlasServiceException e) {
+			throw manageAtlasServiceException(e);
+		}
+
+		return names;
+	}
+	
+	private DataCatalogueException manageAtlasServiceException(AtlasServiceException e) {
+		
+		if(e.getStatus()!=null)
+			return new DataCatalogueException(e.getMessage(),e.getStatus(),e.getCause());
+		else
+			return new DataCatalogueException(e.getMessage(),e.getCause());
+	}
+
 }

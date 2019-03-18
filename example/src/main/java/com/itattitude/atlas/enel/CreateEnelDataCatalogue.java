@@ -1,6 +1,7 @@
-package com.itattitude.atlas.example;
+package com.itattitude.atlas.enel;
 
 import java.io.Console;
+import java.util.List;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.itattitude.atlas.DataCatalogueException;
@@ -50,11 +51,12 @@ public class CreateEnelDataCatalogue {
 		}
 		
 		// Create v2 enel types in Atlas for the enel metadata model
-		enelDataCatalogue.createEnelTypes();
-		
-		// Create v2 entities for the added types in Atlas
-		enelDataCatalogue.createEnelEntities();
-		
+		List<String> names=enelDataCatalogue.createEnelTypes();
+
+		assert (!names.isEmpty());
+		names.forEach(s-> System.out.println("Created type [" + s + "]"));
+
+		System.out.println("\nCreating all Enel types!!");
 	}
 	
 	public static void main(String[] args) {
@@ -63,9 +65,13 @@ public class CreateEnelDataCatalogue {
 			createCatalogue(args);
 		} catch (DataCatalogueException e) {
 			if(e.getErrorCode()==ErrorCodeEnum.MISSING_ATLAS_REST_ADDRESS) {
-				System.out.println("com.enel.afc.enel_data_catalogue.EnelDataCatalogue <missing Atlas Rest address "
+				System.out.println("com.itattitude.atlas.CreateEnelDataCatalogue "
+						+ "<missing Atlas Rest address "
 						+ "\nUSAGE: <http/https>://<atlas-fqdn>:<atlas-port>" 
 						+ "\nExample: http://localhost:21000");
+			} else if(e.getErrorCode() == ErrorCodeEnum.CLIENT_RESPONSE_ERROR) {
+				System.out.println("com.itattitude.atlas.CreateEnelDataCatalogue "
+						+ "<"+e.getMessage());
 			} else e.printStackTrace();
 			System.exit(-1);
 		}
