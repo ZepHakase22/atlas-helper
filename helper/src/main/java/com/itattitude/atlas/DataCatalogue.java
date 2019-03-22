@@ -2,6 +2,7 @@ package com.itattitude.atlas;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.atlas.ApplicationProperties;
@@ -14,6 +15,7 @@ import org.apache.atlas.utils.AuthenticationUtil;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.ArrayUtils;
 
+import com.itattitude.atlas.ClassDef.BaseClassType;
 import com.itattitude.atlas.DataCatalogueException.ErrorCodeEnum;
 
 
@@ -72,9 +74,15 @@ public class DataCatalogue
     		_enumsDef.add(a);
     	}
     }
+    
+    public void createClasses( ClassDef ... args) {
+    	for(ClassDef a: args) {
+    		_classesDef.add(a);
+    	}
+    }
 	
-	public EnumDef createEnum(String name, String description, String typeVersion, List<EnumElementDef> enumElementDef) {
-    	return new EnumDef(name,description,typeVersion,enumElementDef);
+	public EnumDef createEnum(String name, String description, String typeVersion, String serviceType, List<EnumElementDef> enumElementDef) {
+    	return new EnumDef(name,description,typeVersion,serviceType, enumElementDef);
     }
 
 	public String[] getServerUrls(String[] args) throws DataCatalogueException {
@@ -129,6 +137,30 @@ public class DataCatalogue
 			return new DataCatalogueException(e.getMessage(),e.getStatus(),e.getCause());
 		else
 			return new DataCatalogueException(e.getMessage(),e.getCause());
+	}
+
+	public ClassDef createClass(String name, String description, String typeVersion, 
+			BaseClassType baseProcess, String serviceType, List<AttributeDef> attributesDef) {
+		return createClass(name, description, typeVersion, baseProcess.toString(),serviceType, attributesDef);
+	}
+
+	public ClassDef createClass(String name, String description, String typeVersion, 
+			BaseClassType baseProcess, String serviceType, List<AttributeDef> attributesDef,
+			HashMap<String,String> options) {
+		return createClass(name, description, typeVersion, baseProcess.toString(),serviceType, attributesDef, 
+				null);
+	}
+
+	public ClassDef createClass(String name, String description, String typeVersion, 
+			String baseType, String serviceType,List<AttributeDef> attributesDef) {
+		return createClass(name, description, typeVersion, baseType,serviceType, attributesDef, null);
+	}
+	
+	public ClassDef createClass(String name, String description, String typeVersion, 
+			String baseType, String serviceType, List<AttributeDef> attributesDef,
+			HashMap<String,String> options) {
+		
+		return new ClassDef(name, description, typeVersion, baseType, serviceType, attributesDef,options);
 	}
 
 }

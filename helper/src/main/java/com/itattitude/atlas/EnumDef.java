@@ -26,8 +26,10 @@ public class EnumDef extends AtlasEnumDef implements Serializable{
 
 	private static final long serialVersionUID = 1L;
 	
-	public EnumDef(String name, String description, String typeVersion, List<EnumElementDef> enumElementsDef) {
-    	super(name,description,typeVersion,EnumElementDef.asAtlasEnumElementDef(enumElementsDef));
+	public EnumDef(String name, String description, String typeVersion, 
+			String serviceType, List<EnumElementDef> enumElementsDef) {
+    	super(name,description,typeVersion,EnumElementDef.asAtlasEnumElementDef(enumElementsDef),
+    			null,serviceType,null);
 	}
 
 	static List<AtlasEnumDef> asAtlasEnumDef(List<EnumDef> e) {
