@@ -1,9 +1,11 @@
 package com.itattitude.atlas.enel;
 
+import java.io.BufferedReader;
 import java.io.Console;
+import java.io.InputStreamReader;
 import java.util.List;
-
 import com.google.common.annotations.VisibleForTesting;
+import com.itattitude.atlas.DataCatalogue;
 import com.itattitude.atlas.DataCatalogueException;
 import com.itattitude.atlas.DataCatalogueException.ErrorCodeEnum;
 
@@ -17,17 +19,18 @@ public class CreateEnelDataCatalogue {
         try {
             Console console = System.console();
             if (console == null) {
-                System.err.println("Couldn't get a console object for user input");
-                System.exit(1);
+            	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+            	System.out.print("Enter username for atlas :- ");
+            	username = br.readLine();
+            	System.out.print("Enter password for atlas (not masked):- ");
+            	password = br.readLine();
+            } else {
+            	username = console.readLine("Enter username for atlas :- ");
+            	char[] pwdChar = console.readPassword("Enter password for atlas :- ");
+	            if(pwdChar != null) {
+	                password = new String(pwdChar);
+	            }
             }
-
-            username = console.readLine("Enter username for atlas :- ");
-
-            char[] pwdChar = console.readPassword("Enter password for atlas :- ");
-            if(pwdChar != null) {
-                password = new String(pwdChar);
-            }
-
         } catch (Exception e) {
             System.out.print("Error while reading user input");
             System.exit(1);
@@ -60,7 +63,10 @@ public class CreateEnelDataCatalogue {
 	}
 	
 	public static void main(String[] args) {
-    	
+
+		if(DataCatalogue.isDebug())
+			org.apache.log4j.BasicConfigurator.configure();
+		
 		try {
 			createCatalogue(args);
 		} catch (DataCatalogueException e) {

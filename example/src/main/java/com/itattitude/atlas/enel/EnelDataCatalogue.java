@@ -1,6 +1,5 @@
 package com.itattitude.atlas.enel;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,15 +8,18 @@ import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.itattitude.atlas.AttributeDef;
-import com.itattitude.atlas.ClassDef;
 import com.itattitude.atlas.ClassDef.BaseClassType;
 import com.itattitude.atlas.DataCatalogue;
 import com.itattitude.atlas.DataCatalogueException;
+import com.itattitude.atlas.EndDef;
 import com.itattitude.atlas.EnumElementDef;
+import com.itattitude.atlas.RelationshipDef.PropagationType;
+import com.itattitude.atlas.RelationshipDef.UMLCategory;
 import com.itattitude.atlas.SearchFilter;
 import com.itattitude.atlas.AttributeDef.DataCatalogueCardinality;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import com.sun.tools.javac.code.Attribute.Array;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EnelDataCatalogue extends DataCatalogue {
 
@@ -44,6 +46,13 @@ public class EnelDataCatalogue extends DataCatalogue {
 	private String P_O_COLUMN = "P_O_column";
 	private String TG_COLUMN = "TG_column";
 	private String TD_COLUMN = "TD_column";
+	private String ENEL_TABLE_FOREIGN_KEYS = "enel_table_foreign_keys";
+	private String ENEL_TABLE_INDEXES = "enel_table_indexes";
+	private String ENEL_FOREIGN_KEY_KEY_COLUMNS = "enel_foreign_key_key_columns";
+	private String ENEL_FOREIGN_KEY_REFERENCES_TABLE = "enel_foreign_key_references_table";
+	private String ENEL_FOREIGN_KEY_REFERENCES_COLUMNS = "enel_foreign_key_references_columns";
+	private String ENEL_INDEX_COLUMNS = "enel_index_columns";
+	private String ENEL_TABLE_COLUMNS = "enel_table_columns";
 	
     private String[] TYPES = { FREQUENCY_PRINCIPAL_TYPE, ACTIVITY_TYPE_KEY_VALUES, 
     		TYPE_PREVALENT_ACTIVITY_VALUES, ENEL_PROCESS, ENEL_GDS_PROCESS, AFC_TABLE_TO_HIVE_PROCESS,
@@ -307,10 +316,7 @@ public class EnelDataCatalogue extends DataCatalogue {
 				new AttributeDef("technicalName", "string", "Refers to the technical name of the column in scope",
 						false, DataCatalogueCardinality.SINGLE, false, true)
 			);
-				
-
-
-
+ 
 		createClasses(createClass(ENEL_PROCESS, 
 									"The base enel process", 
 									"2.0", 
@@ -432,13 +438,102 @@ public class EnelDataCatalogue extends DataCatalogue {
 									"2.0",
 									ENEL_GDS_COLUMN,
 									"enel",
-									specificColumnAttributesDef));
+									specificColumnAttributesDef)
+						);
 	}
 	
+	private void createEnelRelationship() {
+			
+		EndDef addForeignKeysToEnelTable = new EndDef("foreign_keys", ENEL_TABLE, DataCatalogueCardinality.SET, 
+											true);
+		EndDef addTableToEnelForeignKey = new EndDef("table", ENEL_FOREIGN_KEY,DataCatalogueCardinality.SINGLE);
+		
+		EndDef addIndexesToEnelTable = new EndDef("indexes", ENEL_TABLE, DataCatalogueCardinality.SET, true);
+		EndDef addTableToEnelIndex = new EndDef("table", ENEL_INDEX, DataCatalogueCardinality.SINGLE);
+		
+		EndDef addKeyColumnsToEnelForeignKey = new EndDef("key_columns", ENEL_FOREIGN_KEY, 
+												DataCatalogueCardinality.SET);
+		EndDef addKeyColumnReferencesToEnelColumn = new EndDef("key_column_references", ENEL_COLUMN, 
+													DataCatalogueCardinality.SET);
+		
+		EndDef addReferencesTableToEnelForeignKey = new EndDef("references_table", ENEL_FOREIGN_KEY, 
+													DataCatalogueCardinality.SINGLE);
+		EndDef addReferencesForeignKeyToEnelTable = new EndDef("foreign_key_references", ENEL_TABLE,
+													DataCatalogueCardinality.SET);
+		
+		EndDef addReferencesColumnsToEnelForeignKey = new EndDef("references_columns", ENEL_FOREIGN_KEY,
+												DataCatalogueCardinality.SET);
+		EndDef addReferencesForeignKeyToEnelColumn = new EndDef("foreign_key_references", ENEL_COLUMN, 
+														DataCatalogueCardinality.SET);
+		
+		EndDef addColumnsToEnelIndex = new EndDef("columns", ENEL_INDEX, DataCatalogueCardinality.SET);
+		EndDef addIndexesToenelColumn = new EndDef("indexes", ENEL_COLUMN, DataCatalogueCardinality.SET);
+		
+		EndDef addColumnsToEnelTable = new EndDef("columns", ENEL_TABLE, DataCatalogueCardinality.SET, true);
+		EndDef addTableToEnelColumn = new EndDef("table", ENEL_COLUMN,  DataCatalogueCardinality.SINGLE);
+		
+		createRelationships(createRelationship(ENEL_TABLE_FOREIGN_KEYS,
+												"Relation between enel tables and their foreign keys", 
+												"2.0.0", 
+												"enel",
+												UMLCategory.COMPOSITION,
+												PropagationType.NONE,
+												addForeignKeysToEnelTable, addTableToEnelForeignKey),
+							createRelationship(ENEL_TABLE_INDEXES, 
+												"Relation between enel tables and their indexes", 
+												"2.0.0",
+												"enel", 
+												UMLCategory.COMPOSITION, 
+												PropagationType.NONE, 
+												addIndexesToEnelTable, addTableToEnelIndex),
+							createRelationship(ENEL_FOREIGN_KEY_KEY_COLUMNS, 
+												"Association between the Enel columns and the foreign keys", 
+												"2.0.0", 
+												"enel", 
+												UMLCategory.ASSOCIATION, 
+												PropagationType.NONE, 
+												addKeyColumnsToEnelForeignKey, addKeyColumnReferencesToEnelColumn),
+							createRelationship(ENEL_FOREIGN_KEY_REFERENCES_TABLE, 
+												"Association between the Enel foreign key and the correnspondin enel table", 
+												"2.0.0", 
+												"enel", 
+												UMLCategory.ASSOCIATION, 
+												PropagationType.NONE, 
+												addReferencesTableToEnelForeignKey, 
+												addReferencesForeignKeyToEnelTable),
+							createRelationship(ENEL_FOREIGN_KEY_REFERENCES_COLUMNS, 
+												"Association betwen the foreign key references and the columns referenced", 
+												"2.0.0", 
+												"enel", 
+												UMLCategory.ASSOCIATION, 
+												PropagationType.NONE, 
+												addReferencesColumnsToEnelForeignKey, 
+												addReferencesForeignKeyToEnelColumn),
+							createRelationship(ENEL_INDEX_COLUMNS,
+												"Association the enel index and the columns",
+												"2.0.0",
+												"enel",
+												UMLCategory.ASSOCIATION,
+												PropagationType.NONE,
+												addColumnsToEnelIndex, addIndexesToenelColumn),
+							createRelationship(ENEL_TABLE_COLUMNS,
+												"Relation beween enel table and its columns",
+												"2.0.0",
+												"enel",
+												UMLCategory.COMPOSITION,
+												PropagationType.NONE,
+												addColumnsToEnelTable,
+												addTableToEnelColumn)
+				);
+	}
+
+
+
 	private void createEnelTypesDefinitions() {
 
 		createEnelEnums();
     	createEnelClasses();
+    	createEnelRelationship();
     }
 
 	List<String> verifyTypesCreated() throws DataCatalogueException {
