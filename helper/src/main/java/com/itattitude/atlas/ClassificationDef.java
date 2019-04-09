@@ -1,6 +1,7 @@
 package com.itattitude.atlas;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,8 +27,11 @@ public class ClassificationDef extends AtlasClassificationDef implements Seriali
 	private static final long serialVersionUID = 1L;
 
 	static List<AtlasClassificationDef> asAtlasClassificationDef(List<ClassificationDef> s) {
-		return s.stream().map(AtlasClassificationDef::new)
-		.collect(Collectors.toList());
+		if(s.size() == 0) 
+			return Collections.<AtlasClassificationDef>emptyList();
+		else
+			return s.stream().map(AtlasClassificationDef::new)
+					.collect(Collectors.toList());
 	}
 
 

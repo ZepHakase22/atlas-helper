@@ -11,6 +11,7 @@ import com.itattitude.atlas.AttributeDef;
 import com.itattitude.atlas.ClassDef.BaseClassType;
 import com.itattitude.atlas.DataCatalogue;
 import com.itattitude.atlas.DataCatalogueException;
+import com.itattitude.atlas.DataCatalogueException.ErrorCodeEnum;
 import com.itattitude.atlas.EndDef;
 import com.itattitude.atlas.EnumElementDef;
 import com.itattitude.atlas.RelationshipDef.PropagationType;
@@ -18,8 +19,7 @@ import com.itattitude.atlas.RelationshipDef.UMLCategory;
 import com.itattitude.atlas.SearchFilter;
 import com.itattitude.atlas.AttributeDef.DataCatalogueCardinality;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 public class EnelDataCatalogue extends DataCatalogue {
 
@@ -54,11 +54,14 @@ public class EnelDataCatalogue extends DataCatalogue {
 	private String ENEL_INDEX_COLUMNS = "enel_index_columns";
 	private String ENEL_TABLE_COLUMNS = "enel_table_columns";
 	
-    private String[] TYPES = { FREQUENCY_PRINCIPAL_TYPE, ACTIVITY_TYPE_KEY_VALUES, 
+    private String[] TYPES = {  FREQUENCY_PRINCIPAL_TYPE, ACTIVITY_TYPE_KEY_VALUES, 
     		TYPE_PREVALENT_ACTIVITY_VALUES, ENEL_PROCESS, ENEL_GDS_PROCESS, AFC_TABLE_TO_HIVE_PROCESS,
     		AFC_ML_PROCESS_FROM_WINDOWS_OS, TG_TABLE_TO_HIVE_PROCESS, P_O_TABLE_TO_HIVE_PROCESS,
     		ENEL_TABLE,ENEL_FOREIGN_KEY,ENEL_INDEX,ENEL_GDS_TABLE,AFC_TABLE,P_O_TABLE,TG_TABLE,
-    		TD_TABLE,ENEL_COLUMN, ENEL_GDS_COLUMN, AFC_COLUMN, P_O_COLUMN, TG_COLUMN, TD_COLUMN
+    		TD_TABLE,ENEL_COLUMN, ENEL_GDS_COLUMN, AFC_COLUMN, P_O_COLUMN, TG_COLUMN, TD_COLUMN,
+    		ENEL_TABLE_FOREIGN_KEYS, ENEL_TABLE_INDEXES, ENEL_FOREIGN_KEY_KEY_COLUMNS, 
+    		ENEL_FOREIGN_KEY_REFERENCES_TABLE, ENEL_FOREIGN_KEY_REFERENCES_COLUMNS, ENEL_INDEX_COLUMNS,
+    		ENEL_TABLE_COLUMNS
 	};
 
 	
@@ -535,22 +538,28 @@ public class EnelDataCatalogue extends DataCatalogue {
     	createEnelClasses();
     	createEnelRelationship();
     }
-
-	List<String> verifyTypesCreated() throws DataCatalogueException {
-        MultivaluedMap<String, String> searchParams = new MultivaluedMapImpl();
+	void verifyTypesCreated() throws DataCatalogueException {
+		MultivaluedMap<String, String> searchParams = new MultivaluedMapImpl();
 
         for (String typeName : TYPES) {
+            searchParams.clear();
             searchParams.add(SearchFilter.PARAM_NAME, typeName);
-        }
 
-        SearchFilter searchFilter = new SearchFilter(searchParams);
-        return getAllTypeDefs(searchFilter);
+            SearchFilter  searchFilter = new SearchFilter(searchParams);
+            try {
+                getAllTypeDefs(searchFilter);
+            } catch (DataCatalogueException e) {
+            	if(e.getErrorCode() == ErrorCodeEnum.TYPE_NOT_CREATED) {
+            		throw new DataCatalogueException(e.getMessage() + " " + typeName, e.getErrorCode());
+            	}
+            }
+        }
 	}
-	List<String> createEnelTypes() throws DataCatalogueException {
+	void createEnelTypes() throws DataCatalogueException {
 		
-    	createEnelTypesDefinitions();
-    	saveTypesDef();
-    	return verifyTypesCreated();		
-    	
+//    	createEnelTypesDefinitions();
+//    	saveTypesDef();
+//    	return verifyTypesCreated();	
+    	verifyTypesCreated();
 	}
 }

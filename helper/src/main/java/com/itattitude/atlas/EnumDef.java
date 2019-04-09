@@ -1,6 +1,7 @@
 package com.itattitude.atlas;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,8 +34,11 @@ public class EnumDef extends AtlasEnumDef implements Serializable{
 	}
 
 	static List<AtlasEnumDef> asAtlasEnumDef(List<EnumDef> e) {
-		return e.stream().map(AtlasEnumDef::new)
-		.collect(Collectors.toList());
+		if(e.size() == 0) 
+			return Collections.<AtlasEnumDef>emptyList();
+		else
+			return e.stream().map(AtlasEnumDef::new)
+					.collect(Collectors.toList());
 	}
 	
 	@Override

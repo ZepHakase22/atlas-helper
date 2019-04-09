@@ -2,7 +2,6 @@ package com.itattitude.atlas;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -47,11 +46,11 @@ public class DataCatalogue
 	private String _userName;
 	
     DataCatalogue() {
-    	_enumsDef = Collections.<EnumDef>emptyList();
-    	_structsDef = Collections.<StructDef>emptyList();
-    	_classificationsDef = Collections.<ClassificationDef>emptyList();
-    	_classesDef = Collections.<ClassDef>emptyList();
-    	_relationshipsDef = Collections.<RelationshipDef>emptyList();
+    	_enumsDef = new ArrayList<EnumDef>();
+    	_structsDef = new ArrayList<StructDef>();
+    	_classificationsDef = new ArrayList<ClassificationDef>();
+    	_classesDef = new ArrayList<ClassDef>();;
+    	_relationshipsDef = new ArrayList<RelationshipDef>();;
     }
 
 	public DataCatalogue(String[] args, String[] credentials) throws DataCatalogueException {
@@ -96,7 +95,6 @@ public class DataCatalogue
     public void createEnums( EnumDef ... args) {
 
     	for(EnumDef a: args) {
-    		LOG.info("Connected Atlas Server {} with username: {}",_userName);
     		_enumsDef.add(a);
     	}
     }
@@ -177,23 +175,12 @@ public class DataCatalogue
 		}
     }
 
-	public List<String> getAllTypeDefs(SearchFilter searchFilter) throws DataCatalogueException {
-		List<String> names = new ArrayList<>();
-        try {
-			AtlasTypesDef searchDefs = _atlasClientV2.getAllTypeDefs(searchFilter);
-			searchDefs.getEnumDefs().forEach(s-> names.add(s.getName()));
-			searchDefs.getStructDefs().forEach(s-> names.add(s.getName()));
-			searchDefs.getClassificationDefs().forEach(s-> names.add(s.getName()));
-			searchDefs.getEntityDefs().forEach(s-> names.add(s.getName()));
-			searchDefs.getRelationshipDefs().forEach(s-> names.add(s.getName()));
-			
-		} catch (DataCatalogueException e) {
-			throw manageAtlasServiceException(e);
-		}
-
-		return names;
-	}
-	
+    public void getAllTypeDefs(SearchFilter searchFilter) throws DataCatalogueException {
+        AtlasTypesDef searchDefs   = _atlasClientV2.getAllTypeDefs(searchFilter);
+        if(searchDefs.isEmpty()) {
+        	throw new DataCatalogueException("Error creating type",ErrorCodeEnum.TYPE_NOT_CREATED);
+        }
+    }
 	private DataCatalogueException manageAtlasServiceException(DataCatalogueException e) {
 		
 		if(e.getStatus()!=null)

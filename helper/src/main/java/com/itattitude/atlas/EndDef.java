@@ -30,7 +30,7 @@ public class EndDef extends AtlasRelationshipEndDef implements Serializable{
 	}
 	
 	public EndDef(String name, String type, DataCatalogueCardinality cardinality, boolean isContainer) {
-		super(name, type, cardinality.toCardinality(), isContainer);
+		super(type, name, cardinality.toCardinality(), isContainer);
 	}
 	
 	public StringBuilder toString(StringBuilder sb) {

@@ -2,6 +2,7 @@ package com.itattitude.atlas;
 
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,8 +28,11 @@ public class StructDef extends AtlasStructDef implements Serializable{
 	private static final long serialVersionUID = 1L;
 	
 	static List<AtlasStructDef> asAtlasStructDef(List<StructDef> s) {
-		return s.stream().map(AtlasStructDef::new)
-		.collect(Collectors.toList());
+		if(s.size() == 0)
+			return Collections.<AtlasStructDef>emptyList();
+		else
+			return s.stream().map(AtlasStructDef::new)
+					.collect(Collectors.toList());
 	}
 
 }

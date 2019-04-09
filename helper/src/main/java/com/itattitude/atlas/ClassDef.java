@@ -54,8 +54,11 @@ public class ClassDef extends AtlasEntityDef implements Serializable{
 	}
 
 	static List<AtlasEntityDef> asAtlasEntityDef(List<ClassDef> s) {
-		return s.stream().map(AtlasEntityDef::new)
-		.collect(Collectors.toList());
+		if(s.size() == 0) 
+			return Collections.<AtlasEntityDef>emptyList();
+		else
+			return s.stream().map(AtlasEntityDef::new)
+					.collect(Collectors.toList());
 	}
 	
 	   @Override
