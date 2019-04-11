@@ -53,13 +53,13 @@ public class DataCatalogue
     	_relationshipsDef = new ArrayList<RelationshipDef>();;
     }
 
-	public DataCatalogue(String[] args, String[] credentials) throws DataCatalogueException {
+	public DataCatalogue(String[] hosts, String[] credentials) throws DataCatalogueException {
 		this();
 		
 		if(_urls == null)
-			_urls = this.getServerUrls(args);
+			_urls = this.getServerUrls(hosts);
 		else if(_urls.length==0)
-			_urls = this.getServerUrls(args);
+			_urls = this.getServerUrls(hosts);
 		
 		if(credentials==null) {
 			if(!AuthenticationUtil.isKerberosAuthenticationEnabled()) {
@@ -145,12 +145,12 @@ public class DataCatalogue
 		return new RelationshipDef(name, description, typeVersion, serviceType, category, propagationType, def1, def2);
 	}
 	
-	public String[] getServerUrls(String[] args) throws DataCatalogueException {
+	public String[] getServerUrls(String[] hosts) throws DataCatalogueException {
 		
 		Configuration configuration;
 		
-		if(args.length>0)
-			return args[0].split(",");
+		if(hosts.length>0)
+			return hosts;
 		
 		try {
 			configuration = ApplicationProperties.get();

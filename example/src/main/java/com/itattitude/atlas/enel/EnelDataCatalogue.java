@@ -557,9 +557,8 @@ public class EnelDataCatalogue extends DataCatalogue {
 	}
 	void createEnelTypes() throws DataCatalogueException {
 		
-//    	createEnelTypesDefinitions();
-//    	saveTypesDef();
-//    	return verifyTypesCreated();	
+    	createEnelTypesDefinitions();
+    	saveTypesDef();
     	verifyTypesCreated();
 	}
 }
